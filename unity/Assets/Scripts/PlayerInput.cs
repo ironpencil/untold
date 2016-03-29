@@ -1,73 +1,60 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Prime31;
 
 public class PlayerInput : MonoBehaviour {
 
-    public BaseMovement movementController;
-    public FacingHandler facingHandler;
-    public WeaponHandler weaponHandler;
+    CharacterController2D cc2d;
 
-    public bool canMoveWhileAttacking = false;
+    void Awake ()
+    {
+        //cache cc2d
+        cc2d = gameObject.GetComponent<CharacterController2D>();
+    }
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
 	// Update is called once per frame
 	void Update () {
 
         if (Globals.Instance.acceptPlayerGameInput)
         {
             HandleMovement();
-            HandleAttack();
         }
 	
 	}
 
-    private void HandleAttack()
-    {
-        if (Input.GetButtonDown("Attack"))
-        {
-            weaponHandler.Attack(facingHandler.facing);
-        }
-    }
 
     void HandleMovement()
     {
 
         float horizontal = 0.0f;
-        float vertical = 0.0f;
+        //float vertical = 0.0f;
 
-        if (canMoveWhileAttacking || !weaponHandler.IsAttacking())
-        {
             horizontal = Input.GetAxis("Horizontal");
-            vertical = Input.GetAxis("Vertical");
-        }
+        //vertical = Input.GetAxis("Vertical");
 
-        float horizontalMovement = 0.0f;
-        float verticalMovement = 0.0f;
+        //float horizontalMovement = 0.0f;
+        //float verticalMovement = 0.0f;
 
-        if (horizontal > 0.0f)
-        {
-            horizontalMovement = 1.0f;
-        }
-        else if (horizontal < 0.0f)
-        {
-            horizontalMovement = -1.0f;
-        }
+        //if (horizontal > 0.0f)
+        //{
+        //    horizontalMovement = 1.0f;
+        //}
+        //else if (horizontal < 0.0f)
+        //{
+        //    horizontalMovement = -1.0f;
+        //}
 
-        if (vertical > 0.0f)
-        {
-            verticalMovement = 1.0f;
-        }
-        else if (vertical < 0.0f)
-        {
-            verticalMovement = -1.0f;
-        }
+        //if (vertical > 0.0f)
+        //{
+        //    verticalMovement = 1.0f;
+        //}
+        //else if (vertical < 0.0f)
+        //{
+        //    verticalMovement = -1.0f;
+        //}
+        Vector2 deltaMove = new Vector2(horizontal, 0.0f);
 
-        movementController.movementDirection = new Vector2(horizontalMovement, verticalMovement);
+        cc2d.move(deltaMove);
 
-        facingHandler.UpdateFacing();
     }
 }
