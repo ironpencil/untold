@@ -9,16 +9,16 @@
 		_Cutoff("Shadow alpha cutoff", Range(0,1)) = 0.5
 	}
 
-		SubShader
+	SubShader
 	{
 		Tags
-	{
-		"Queue" = "Transparent"
-		"IgnoreProjector" = "True"
-		"RenderType" = "Transparent"
-		"PreviewType" = "Plane"
-		"CanUseSpriteAtlas" = "True"
-	}
+		{
+			"Queue" = "Transparent"
+			"IgnoreProjector" = "True"
+			"RenderType" = "Transparent"
+			"PreviewType" = "Plane"
+			"CanUseSpriteAtlas" = "True"
+		}
 
 		Cull Off
 		Lighting Off
@@ -26,72 +26,74 @@
 		Blend One OneMinusSrcAlpha
 
 		Pass
-	{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma multi_compile _ PIXELSNAP_ON
-#include "UnityCG.cginc"
+		{
+			CGPROGRAM
+	#pragma vertex vert
+	#pragma fragment frag
+	#pragma multi_compile _ PIXELSNAP_ON
+	#include "UnityCG.cginc"
 
-	struct appdata_t
-	{
-		float4 vertex   : POSITION;
-		float4 color    : COLOR;
-		float2 texcoord : TEXCOORD0;
-	};
+			struct appdata_t
+			{
+				float4 vertex   : POSITION;
+				float4 color    : COLOR;
+				float2 texcoord : TEXCOORD0;
+			};
 
-	struct v2f
-	{
-		float4 vertex   : SV_POSITION;
-		fixed4 color : COLOR;
-		float2 texcoord  : TEXCOORD0;
-	};
+			struct v2f
+			{
+				float4 vertex   : SV_POSITION;
+				fixed4 color : COLOR;
+				float2 texcoord  : TEXCOORD0;
+			};
 
-	fixed4 _Color;
+			fixed4 _Color;
 
-	v2f vert(appdata_t IN)
-	{
-		v2f OUT;
-		OUT.vertex = mul(UNITY_MATRIX_MVP, IN.vertex);
-		OUT.texcoord = IN.texcoord;
-		OUT.color = IN.color * _Color;
-#ifdef PIXELSNAP_ON
-		OUT.vertex = UnityPixelSnap(OUT.vertex);
-#endif
+			v2f vert(appdata_t IN)
+			{
+				v2f OUT;
+				OUT.vertex = mul(UNITY_MATRIX_MVP, IN.vertex);
+				OUT.texcoord = IN.texcoord;
+				OUT.color = IN.color * _Color;
+		#ifdef PIXELSNAP_ON
+				OUT.vertex = UnityPixelSnap(OUT.vertex);
+		#endif
 
-		return OUT;
-	}
+				return OUT;
+			}
 
-	sampler2D _MainTex;
-	sampler2D _AlphaTex;
-	float _AlphaSplitEnabled;
-	fixed4 _AColor;
-	float _Cutoff;
+			sampler2D _MainTex;
+			sampler2D _AlphaTex;
+			float _AlphaSplitEnabled;
+			fixed4 _AColor;
+			float _Cutoff;
 
-	fixed4 SampleSpriteTexture(float2 uv)
-	{
-		fixed4 color = tex2D(_MainTex, uv);
+			fixed4 SampleSpriteTexture(float2 uv)
+			{
+				fixed4 color = tex2D(_MainTex, uv);
 
-#if UNITY_TEXTURE_ALPHASPLIT_ALLOWED
-		if (_AlphaSplitEnabled)
-			color.a = tex2D(_AlphaTex, uv).r;
-#endif //UNITY_TEXTURE_ALPHASPLIT_ALLOWED
+		#if UNITY_TEXTURE_ALPHASPLIT_ALLOWED
+				if (_AlphaSplitEnabled)
+					color.a = tex2D(_AlphaTex, uv).r;
+		#endif //UNITY_TEXTURE_ALPHASPLIT_ALLOWED
 
-		return color;
-	}
+				return color;
+			}
 
-	fixed4 frag(v2f IN) : SV_Target
-	{
-		fixed4 c = SampleSpriteTexture(IN.texcoord) * IN.color;
-		c.rgb *= c.a;
+			fixed4 frag(v2f IN) : SV_Target
+			{
+				fixed4 c = SampleSpriteTexture(IN.texcoord) * IN.color;
 
-		if (c.a > _Cutoff)
-			c = c * _AColor;
+				//if (c.a > _Cutoff) {
+					c.a = 1.0f - c.a;
+					//c.a = c.a * _AColor.a;
+				//}
 
+				//c.rgb *= c.a;
 
-	return c;
-	}
-		ENDCG
-	}
+				return c;
+			}
+			ENDCG
+		}
 	}
 }

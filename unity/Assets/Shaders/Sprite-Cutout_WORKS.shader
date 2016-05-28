@@ -1,4 +1,4 @@
-﻿Shader "Sprites/Cutout"
+﻿Shader "Sprites/CutoutOld"
 {
 	Properties
 	{
