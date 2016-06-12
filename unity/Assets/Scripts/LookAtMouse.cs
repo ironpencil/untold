@@ -60,14 +60,50 @@ public class LookAtMouse : MonoBehaviour {
 
     public void RotateWithoutPhysics()
     {
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        Vector3 thisPos = transform.localPosition;
+        Vector3 thisPos = transform.position;
         Vector2 offset = new Vector2(mousePos.x - thisPos.x, mousePos.y - thisPos.y);
 
         var angle = Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
 
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        deltaAngle = angle - transform.localRotation.eulerAngles.z;
+
+        if (deltaAngle >= 180.0f)
+        {
+            deltaAngle = deltaAngle - 360.0f;
+        }
+        else if (deltaAngle <= -180.0f)
+        {
+            deltaAngle = deltaAngle + 360.0f;
+        }
+        //Vector3 eulerAngleVelocity = new Vector3(0.0f, 0.0f, angle);
+        //Quaternion deltaRotation = Quaternion.Euler(eulerAngleVelocity * 1.0f);
+
+        rbRotation = transform.localRotation.eulerAngles.z;
+
+
+
+        if (rbRotation > 360.0f)
+        {
+            rbRotation = rbRotation - 360.0f;
+            foreach (Rigidbody2D addlRB in addlRbAdjust)
+            {
+                addlRB.rotation = addlRB.rotation - 360.0f;
+            }
+        }
+        else if (rbRotation < -360.0f)
+        {
+            rbRotation = rbRotation + 360.0f;
+            foreach (Rigidbody2D addlRB in addlRbAdjust)
+            {
+                addlRB.rotation = addlRB.rotation + 360.0f;
+            }
+        }
+
+        resultantRotation = rbRotation + (deltaAngle * turnSpeed * Time.smoothDeltaTime);
+
+        transform.rotation = Quaternion.Euler(0, 0, resultantRotation);
     }
 
     public void RotateWithPhysics()
